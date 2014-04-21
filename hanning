@@ -1,0 +1,10 @@
+function [ w ] = hanning( x )
+%Hanning creates a standard Hanning Window to be applied to a
+%periodogram
+
+fs = 2*x;
+    for k = 0:x
+        w(k+1,1) = .5*(1 - cos(2*pi*k/x));
+    end
+end
+
