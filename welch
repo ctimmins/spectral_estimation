@@ -1,0 +1,52 @@
+function varargout  = pwelch(data_in,Fs,NFFT,Noverlap)
+%Spectral estimation by Welch's method
+
+if NFFT > length(data_in)
+    Pxx1 = [];
+    errordlg('FFT points exceeds data points.  Automatically set to number of data
+              points.')
+    NFFT = length(data_in);
+end
+    T = 1/Fs;  %Sample interval  (sec/sample)
+
+    N = length(data_in);  %number of data points
+    bin = 1/(NFFT*T);  %frequency gap between successive data points (Hz)
+  
+    w = hanning(NFFT-1);  %standard hanning window
+    s = min(size(data_in));
+    w = repmat(w,1,s);
+ 
+    index = 1:NFFT;  %index of data in first segment 
+    [m,n] = size(data_in);
+    
+    if n > m
+        data_in = data_in';  %column to rows
+        data_in(index,:) = detrend(data_in(index,:),'constant');
+    else
+        data_in(index,:) = detrend(data_in(index,:),'constant');
+    end
+    
+    k = fix(N/(max(size(w)*(1-Noverlap))));  %number of windows to be applied
+    P1 = zeros(NFFT,s);
+
+    
+    SCN = k*norm(w)^2;  %normalized scaling factor
+
+    for j = 1:k
+        XW1 = w.*data_in(index,:);
+        index = index + fix((NFFT*(1 - Noverlap)));
+        P1 = P1 + (abs(fft(XW1,NFFT))/k).^2;  %frequency bins
+
+    end
+        
+    
+    Pxx1 = (P1((1:(NFFT/2)+1),:))/(Fs*SCN); %PSD estimate
+    varargout{1} = Pxx1();
+    
+    q = 0:fix(NFFT/2);
+    varargout{2} = q*bin;
+
+   
+    
+end
+
